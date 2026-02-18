@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEURAL-LINK | Site Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Orbitron:wght@400;700&display=swap');
+        
+        :root {
+            --neon-cyan: #00f3ff;
+            --neon-magenta: #ff00ff;
+            --neon-green: #39ff14;
+            --neon-amber: #ffaa00;
+            --neon-red: #ff3131;
+            --bg-dark: #050505;
+        }
+
+        body {
+            font-family: 'JetBrains+Mono', monospace;
+            background-color: var(--bg-dark);
+            color: #e2e8f0;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .heading-font { font-family: 'Orbitron', sans-serif; }
+
+        .cyber-panel {
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 243, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            animation: scan-line 4s linear infinite;
+        }
+
+        @keyframes scan-line {
+            0% { transform: translateY(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(1000%); opacity: 0; }
+        }
+
+        .status-orb {
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .status-green { background-color: var(--neon-green); box-shadow: 0 0 15px var(--neon-green); }
+        .status-amber { background-color: var(--neon-amber); box-shadow: 0 0 15px var(--neon-amber); }
+        .status-red { background-color: var(--neon-red); box-shadow: 0 0 15px var(--neon-red); }
+        .status-gray { background-color: #334155; }
+
+        .latency-bar {
+            width: 4px;
+            margin-right: 2px;
+            border-radius: 0;
+            transition: height 0.3s ease;
+        }
+
+        .cyber-btn {
+            background: transparent;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-btn:hover {
+            background: var(--neon-cyan);
+            color: black;
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        .glitch-text:hover {
+            animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--neon-cyan); }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div class="relative">
+                <div class="absolute -top-6 -left-6 w-12 h-12 border-t-2 border-l-2 border-cyan-500 opacity-50"></div>
+                <h1 class="text-4xl font-black heading-font tracking-widest text-white uppercase glitch-text">
+                    Network <span class="text-cyan-400">Sentinel</span>
+                </h1>
+                <div class="flex items-center gap-4 mt-2">
+                    <span class="text-[10px] text-cyan-500 font-bold uppercase tracking-[0.3em]">System.v4.0_Live</span>
+                    <div class="h-1 flex-1 bg-slate-800 w-32 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-cyan-500/30 animate-[pulse_2s_infinite]"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button id="saveConfigBtn" class="cyber-btn px-6 py-2 text-xs font-bold rounded-none">
+                    Upload_Config
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Main Monitoring Table -->
+            <div class="lg:col-span-3 space-y-8">
+                <div class="cyber-panel rounded-none border-l-4 border-l-cyan-500">
+                    <div class="p-2 bg-cyan-500/10 border-b border-cyan-500/20">
+                        <span class="text-[9px] font-bold text-cyan-400 ml-4">DATAFEED_ACTIVE // REALTIME_DASHBOARD</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-cyan-500/50 border-b border-white/5">
+                                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest">Node</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest">Protocol / Addr</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest">Latency_Wave</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-right">Term</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monitorTableBody" class="divide-y divide-white/5">
+                                <!-- Dynamic Content -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="emptyState" class="hidden p-20 text-center">
+                        <div class="text-cyan-500/20 mb-4 flex justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <h3 class="heading-font text-cyan-500 text-sm tracking-widest">DATABASE_EMPTY</h3>
+                        <p class="text-slate-500 text-[10px] mt-2 italic">Awaiting node initialization...</p>
+                    </div>
+                </div>
+
+                <!-- Input Interface -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                    <div class="md:col-span-3 relative">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-500/50 text-xs font-bold">URI://</div>
+                        <input type="url" id="siteUrlInput" placeholder="ENTER_TARGET_DOMAIN" 
+                            class="w-full bg-black/40 border border-cyan-500/30 pl-16 pr-4 py-4 rounded-none text-cyan-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-bold placeholder:text-slate-700">
+                    </div>
+                    <button id="addSiteBtn" class="cyber-btn h-full py-4 font-bold flex flex-col items-center justify-center leading-none">
+                        <span class="text-lg">+</span>
+                        <span class="text-[9px]" id="siteCount">0/5</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Side Intelligence Sidebar -->
+            <div class="space-y-8">
+                <!-- Log Console -->
+                <div class="cyber-panel flex flex-col h-[500px] border-t-4 border-t-magenta-500/50">
+                    <div class="p-3 border-b border-white/5 flex justify-between items-center bg-white/5">
+                        <h3 class="text-[10px] font-bold text-magenta-400 heading-font tracking-tighter">EVENT_STREAM</h3>
+                        <button id="clearLogsBtn" class="text-[8px] hover:text-white text-slate-500 uppercase">Flush_Cache</button>
+                    </div>
+                    <div id="eventLog" class="p-4 overflow-y-auto flex-1 font-mono text-[10px] space-y-4">
+                        <div class="text-slate-600 italic">SYSTEM_INIT_SUCCESS...</div>
+                    </div>
+                </div>
+
+                <!-- Global Telemetry -->
+                <div class="cyber-panel p-6 border-b-4 border-b-cyan-500/50">
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between text-[10px] mb-1 font-bold text-cyan-500/70">
+                                <span>PACKET_TOTAL</span>
+                                <span id="totalPingsCounter">0</span>
+                            </div>
+                            <div class="h-1 w-full bg-slate-900 overflow-hidden">
+                                <div id="packetBar" class="h-full bg-cyan-500 transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[10px] mb-1 font-bold text-cyan-500/70">
+                                <span>AVG_LATENCY</span>
+                                <span id="avgLatency">0 ms</span>
+                            </div>
+                            <div class="h-1 w-full bg-slate-900">
+                                <div id="latencyBar" class="h-full bg-cyan-400 shadow-[0_0_10px_#00f3ff]" style="width: 20%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="mt-12 text-center opacity-40">
+            <div class="text-[9px] font-mono tracking-widest text-cyan-500 uppercase">
+                &copy; 2024 Neural-Link Cyber-Command | Unauthorized access is restricted
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast Layer -->
+    <div id="toastContainer" class="fixed top-6 right-6 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        // --- System Logic ---
+        let sites = [];
+        let totalPings = 0;
+        let logs = [];
+        const MAX_SITES = 5;
+        const PING_INTERVAL = 5000;
+        const LATENCY_HISTORY_SIZE = 18;
+
+        const tableBody = document.getElementById('monitorTableBody');
+        const eventLog = document.getElementById('eventLog');
+        const siteInput = document.getElementById('siteUrlInput');
+        const addBtn = document.getElementById('addSiteBtn');
+        const saveBtn = document.getElementById('saveConfigBtn');
+        const clearLogsBtn = document.getElementById('clearLogsBtn');
+        const emptyState = document.getElementById('emptyState');
+        const siteCountLabel = document.getElementById('siteCount');
+        const totalPingsEl = document.getElementById('totalPingsCounter');
+        const avgLatencyEl = document.getElementById('avgLatency');
+
+        window.onload = () => {
+            loadConfig();
+            renderAll();
+            startMonitoring();
+        };
+
+        // --- Controller ---
+
+        function addSite() {
+            let url = siteInput.value.trim();
+            if (!url) return showToast("ERR: EMPTY_INPUT", "error");
+            if (!url.startsWith('http')) url = 'https://' + url;
+
+            if (sites.length >= MAX_SITES) return showToast("ERR: BUFFER_OVERFLOW", "error");
+            if (sites.find(s => s.url === url)) return showToast("ERR: DUPLICATE_NODE", "error");
+
+            sites.push({
+                id: Date.now(),
+                url: url,
+                history: [],
+                currentStatus: 'gray',
+                lastLatency: 0
+            });
+
+            addLog(url, 'info', 'Injected target into datastream');
+            siteInput.value = '';
+            renderAll();
+            showToast("NODE_SYNC_SUCCESS");
+        }
+
+        function removeSite(id) {
+            const site = sites.find(s => s.id === id);
+            if (site) addLog(site.url, 'info', 'Target purged from memory');
+            sites = sites.filter(s => s.id !== id);
+            renderAll();
+        }
+
+        async function pingSite(site) {
+            const start = performance.now();
+            let success = false;
+            let latency = 0;
+
+            try {
+                await fetch(site.url, { mode: 'no-cors', cache: 'no-store' });
+                latency = Math.round(performance.now() - start);
+                success = true;
+            } catch (err) {
+                success = false;
+                latency = 0;
+            }
+
+            totalPings++;
+            site.lastLatency = latency;
+            site.history.push({ timestamp: Date.now(), success, latency });
+
+            if (site.history.length > 50) site.history.shift();
+
+            updateStatus(site);
+            updateGlobalStats();
+            renderTable();
+        }
+
+        function updateStatus(site) {
+            const now = Date.now();
+            const last30s = site.history.filter(h => now - h.timestamp <= 30000);
+            const last60s = site.history.filter(h => now - h.timestamp <= 60000);
+
+            const dropped30s = last30s.filter(h => !h.success).length;
+            const dropped60s = last60s.filter(h => !h.success).length;
+
+            let newStatus = 'green';
+            if (dropped60s > 10) newStatus = 'red';
+            else if (dropped30s > 3) newStatus = 'amber';
+
+            if (site.currentStatus !== newStatus) {
+                const oldStatus = site.currentStatus;
+                site.currentStatus = newStatus;
+                addLog(site.url, newStatus, `STATE_SHIFT: ${oldStatus} >> ${newStatus}`);
+            }
+        }
+
+        // --- Visual Engine ---
+
+        function renderAll() {
+            renderTable();
+            renderLogs();
+            updateGlobalStats();
+        }
+
+        function renderTable() {
+            tableBody.innerHTML = '';
+            
+            if (sites.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                sites.forEach(site => {
+                    const row = document.createElement('tr');
+                    row.className = "hover:bg-cyan-500/5 transition-all group";
+                    
+                    const latencies = site.history.slice(-LATENCY_HISTORY_SIZE);
+                    const maxLat = Math.max(...latencies.map(l => l.latency), 300);
+                    
+                    let sparklineHtml = `<div class="flex items-end h-10 w-40 bg-black/40 border border-white/5 p-1 relative">`;
+                    latencies.forEach(h => {
+                        const hRatio = Math.max(8, (h.latency / maxLat) * 100);
+                        const colorClass = h.success ? 'bg-cyan-500' : 'bg-red-500 shadow-[0_0_8px_#ff3131]';
+                        sparklineHtml += `<div class="latency-bar ${colorClass}" style="height: ${h.success ? hRatio : 100}%"></div>`;
+                    });
+                    sparklineHtml += `</div>`;
+
+                    row.innerHTML = `
+                        <td class="px-6 py-6">
+                            <div class="flex items-center gap-4">
+                                <span class="status-orb status-${site.currentStatus}"></span>
+                                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-tighter group-hover:text-cyan-400 transition-colors">${site.currentStatus}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-6">
+                            <div class="font-bold text-white text-xs truncate max-w-[200px]">${site.url.replace(/(https?:\/\/)/, '')}</div>
+                            <div class="text-[9px] text-cyan-500/50 mt-1 font-mono">${site.lastLatency > 0 ? 'RTT: ' + site.lastLatency + 'MS' : 'STATUS: OFFLINE'}</div>
+                        </td>
+                        <td class="px-6 py-6">
+                            ${sparklineHtml}
+                        </td>
+                        <td class="px-6 py-6 text-right">
+                            <button onclick="removeSite(${site.id})" class="text-slate-600 hover:text-cyan-400 transition-all font-mono text-xs">
+                                [DISCONNECT]
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+            siteCountLabel.innerText = `${sites.length}/${MAX_SITES}`;
+        }
+
+        function renderLogs() {
+            if (logs.length === 0) {
+                eventLog.innerHTML = `<div class="text-slate-700 italic">LISTENING_FOR_EVENTS...</div>`;
+                return;
+            }
+            
+            eventLog.innerHTML = logs.map(log => {
+                let color = 'text-cyan-500';
+                if (log.type === 'red') color = 'text-red-500';
+                if (log.type === 'amber') color = 'text-amber-500';
+
+                return `
+                    <div class="border-l-2 border-white/5 pl-3 py-1 animate-[fadeIn_0.5s_ease-out]">
+                        <div class="flex justify-between items-center opacity-40 text-[8px] mb-1">
+                            <span>TRACE_${log.url.split('//')[1]?.substring(0,10) || 'NODE'}</span>
+                            <span>${log.time}</span>
+                        </div>
+                        <div class="${color} font-bold break-words leading-tight uppercase text-[9px]">
+                            > ${log.msg}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addLog(url, type, msg) {
+            const time = new Date().toLocaleTimeString([], { hour12: false });
+            logs.unshift({ url, type, msg, time });
+            if (logs.length > 25) logs.pop();
+            renderLogs();
+        }
+
+        function updateGlobalStats() {
+            totalPingsEl.innerText = totalPings.toLocaleString();
+            document.getElementById('packetBar').style.width = (totalPings % 100) + '%';
+            
+            const allLatencies = sites.flatMap(s => s.history.filter(h => h.success).map(h => h.latency));
+            if (allLatencies.length > 0) {
+                const avg = Math.round(allLatencies.reduce((a, b) => a + b, 0) / allLatencies.length);
+                avgLatencyEl.innerText = `${avg} MS`;
+                document.getElementById('latencyBar').style.width = Math.min(100, (avg / 10)) + '%';
+            } else {
+                avgLatencyEl.innerText = `0 MS`;
+            }
+        }
+
+        function startMonitoring() {
+            setInterval(() => {
+                sites.forEach(site => pingSite(site));
+            }, PING_INTERVAL);
+        }
+
+        // --- IO ---
+
+        function saveConfig() {
+            const config = sites.map(s => ({ url: s.url }));
+            localStorage.setItem('sentinel_config', JSON.stringify(config));
+            showToast("CONFIG_SYNCED_TO_LOCAL_VOL");
+        }
+
+        function loadConfig() {
+            const saved = localStorage.getItem('sentinel_config');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    sites = parsed.map(item => ({
+                        id: Date.now() + Math.random(),
+                        url: item.url,
+                        history: [],
+                        currentStatus: 'gray',
+                        lastLatency: 0
+                    }));
+                } catch (e) { console.error(e); }
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = `bg-cyan-500 text-black px-4 py-2 font-bold text-[10px] tracking-widest shadow-[0_0_20px_#00f3ff] flex items-center gap-3`;
+            toast.innerHTML = `<span>[SYSTEM_MSG]</span><span>${message}</span>`;
+            document.getElementById('toastContainer').appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            }, 2500);
+        }
+
+        // --- Events ---
+        addBtn.addEventListener('click', addSite);
+        siteInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') addSite(); });
+        saveBtn.addEventListener('click', saveConfig);
+        clearLogsBtn.addEventListener('click', () => { logs = []; renderLogs(); });
+
+    </script>
+
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</body>
+</html>
