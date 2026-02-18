@@ -30,6 +30,8 @@ No compilation step is required.
 - **Purge node**: Click `Purge_Node` on a row to remove a target.
 - **Upload config**: Click `Upload_Config` to save monitored nodes to local storage.
 - **Flush cache**: Click `Flush_Cache` to clear the event stream display.
+- **Export logs**: Use `Logs_JSON` or `Logs_CSV` in the event stream header.
+- **Export latency history**: Use `Latency_JSON` or `Latency_CSV` in telemetry.
 
 ### PowerShell app
 - **INJECT_NODE** adds a URL to the monitoring buffer.
@@ -38,7 +40,7 @@ No compilation step is required.
 
 ## Roadmap
 
-- Add export options for logs and latency history (JSON/CSV).
+- Add import support for previously exported logs/latency snapshots.
 - Add configurable thresholds and monitor intervals from the UI.
 - Add lightweight test coverage for core status transition logic.
 - Add optional alert integrations (email/webhook/Slack).
